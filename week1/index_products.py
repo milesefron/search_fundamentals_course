@@ -85,7 +85,16 @@ def get_opensearch():
     port = 9200
     auth = ('admin', 'admin')
     #### Step 2.a: Create a connection to OpenSearch
-    client = None
+    # client = None
+    client = OpenSearch(
+        hosts = [{'host': host, 'port': port}],
+        http_compress = True,
+        http_auth = auth,
+        use_ssl = True,
+        verify_certs = False,
+        ssl_assert_hostname = False,
+        ssl_show_warn = False
+    )
     return client
 
 
@@ -107,9 +116,12 @@ def index_file(file, index_name):
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
         #### Step 2.b: Create a valid OpenSearch Doc and bulk index 2000 docs at a time
-        the_doc = None
+        the_doc = doc
         docs.append(the_doc)
-
+        if len(docs) > 1999:
+            client.bulk(docs)
+            docs_indexed = docs_indexed + len(docs)
+            docs = []
     return docs_indexed
 
 @click.command()
@@ -117,8 +129,8 @@ def index_file(file, index_name):
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--workers', '-w', default=8, help="The number of workers to use to process files")
 def main(source_dir: str, index_name: str, workers: int):
-
-    files = glob.glob(source_dir + "/*.xml")
+    print("INDEX: " + index_name)
+    files = glob.glob(source_dir + "/products_011*.xml")
     docs_indexed = 0
     start = perf_counter()
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
