@@ -9,6 +9,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -18,6 +19,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -27,6 +29,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -36,6 +39,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 1024
           }
         }
@@ -45,6 +49,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -67,6 +72,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 1024
           }
         }
@@ -82,6 +88,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -91,6 +98,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -100,6 +108,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -109,6 +118,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -130,6 +140,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 1024
           }
         }
@@ -139,6 +150,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 1024
           }
         }
@@ -148,6 +160,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -157,6 +170,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -185,6 +199,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 5120
           }
         }
@@ -194,6 +209,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 5120
           }
         }
@@ -203,6 +219,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -215,6 +232,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -227,6 +245,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -242,6 +261,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 5120
           }
         }
@@ -251,6 +271,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -260,6 +281,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -269,6 +291,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 1024
           }
         }
@@ -278,6 +301,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -296,6 +320,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -305,6 +330,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -314,6 +340,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -326,6 +353,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
@@ -335,6 +363,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 5120
           }
         }
@@ -344,6 +373,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 5120
           }
         }
@@ -353,6 +383,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+            "analyzer": "english",
             "ignore_above": 256
           }
         }
