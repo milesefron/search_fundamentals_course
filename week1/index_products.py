@@ -100,6 +100,7 @@ def get_opensearch():
 
 def index_file(file, index_name):
     docs_indexed = 0
+    docs_failed = 0
     client = get_opensearch()
     logger.info(f'Processing file : {file}')
     tree = etree.parse(file)
@@ -121,47 +122,47 @@ def index_file(file, index_name):
         #)
 
         if 'productId' not in doc or len(doc['productId']) == 0:
+            docs_failed += 1
             continue
+
         #### Step 2.b: Create a valid OpenSearch Doc and bulk index 2000 docs at a time
-        doc_object = {}
-        doc_object['_index'] = index_name
-        doc_object['_id'] = doc['productId'][0]
-        doc_object['_source'] = doc
 
         doc['_index'] = index_name
-        doc['_id'] = doc['productId'][0]
+        #doc['_id'] = doc['productId'][0]
         docs.append(doc)
 
         if len(docs) > 1999:
             response = bulk(client, docs)
-            print(response)
-            docs_indexed = docs_indexed + len(docs)
+            docs_indexed = docs_indexed + response[0] # len(docs)
             docs = []
     
     # pick up any % 1999 unindexed documents
     if len(docs) > 0:
         response = bulk(client, docs)
-        docs_index = docs_indexed + len(docs)
+        docs_indexed = docs_indexed + len(docs)
         docs = []
-    return docs_indexed
+    return (docs_indexed, docs_failed)
 
 @click.command()
 @click.option('--source_dir', '-s', help='XML files source directory')
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--workers', '-w', default=8, help="The number of workers to use to process files")
 def main(source_dir: str, index_name: str, workers: int):
-    #index_name = 'bb_test_001'
     print("INDEX: " + index_name)
-    files = glob.glob(source_dir + "/products_011*.xml")
+    #files = glob.glob(source_dir + "/products_011*.xml")
+    files = glob.glob(source_dir + "/*.xml")
     docs_indexed = 0
+    docs_failed = 0
     start = perf_counter()
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
         futures = [executor.submit(index_file, file, index_name) for file in files]
         for future in concurrent.futures.as_completed(futures):
-            docs_indexed += future.result()
-
+            (batch_indexed, batch_failed) = future.result()
+            docs_indexed += batch_indexed
+            docs_failed += batch_failed
+            logger.info(f'Total Indexed: {docs_indexed}. Failed: {docs_failed}')
     finish = perf_counter()
-    logger.info(f'Done. Total docs: {docs_indexed} in {(finish - start)/60} minutes')
+    logger.info(f'Done. Total docs: {docs_indexed} . and Failed: {docs_failed}')
 
 if __name__ == "__main__":
     main()
