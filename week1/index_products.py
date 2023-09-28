@@ -112,16 +112,37 @@ def index_file(file, index_name):
             xpath_expr = mappings[idx]
             key = mappings[idx + 1]
             doc[key] = child.xpath(xpath_expr)
-        #print(doc)
+
+        #print(doc['productId'])
+        #client.index(
+        #    index = index_name,
+        #    id = doc['productId'][0],
+        #    body = doc
+        #)
+
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
         #### Step 2.b: Create a valid OpenSearch Doc and bulk index 2000 docs at a time
-        the_doc = doc
-        docs.append(the_doc)
+        doc_object = {}
+        doc_object['_index'] = index_name
+        doc_object['_id'] = doc['productId'][0]
+        doc_object['_source'] = doc
+
+        doc['_index'] = index_name
+        doc['_id'] = doc['productId'][0]
+        docs.append(doc)
+
         if len(docs) > 1999:
-            client.bulk(docs)
+            response = bulk(client, docs)
+            print(response)
             docs_indexed = docs_indexed + len(docs)
             docs = []
+    
+    # pick up any % 1999 unindexed documents
+    if len(docs) > 0:
+        response = bulk(client, docs)
+        docs_index = docs_indexed + len(docs)
+        docs = []
     return docs_indexed
 
 @click.command()
@@ -129,6 +150,7 @@ def index_file(file, index_name):
 @click.option('--index_name', '-i', default="bbuy_products", help="The name of the index to write to")
 @click.option('--workers', '-w', default=8, help="The number of workers to use to process files")
 def main(source_dir: str, index_name: str, workers: int):
+    #index_name = 'bb_test_001'
     print("INDEX: " + index_name)
     files = glob.glob(source_dir + "/products_011*.xml")
     docs_indexed = 0

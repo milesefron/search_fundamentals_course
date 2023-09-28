@@ -7,6 +7,7 @@ host = 'localhost'
 port = 9200
 auth = ('admin', 'admin')  # For testing only. Don't store credentials in code.
 
+    
 # Create the client with SSL/TLS enabled, but hostname and certificate verification disabled.
 client = OpenSearch(
     hosts=[{'host': host, 'port': port}],
@@ -129,7 +130,7 @@ for doc in docs:
     print(response)
 
 # Do some searches
-q = 'dogs'
+q = 'DVD player'
 query = {
     'size': 5,
     'query': {
