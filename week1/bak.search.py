@@ -10,6 +10,7 @@ from week1.opensearch import get_opensearch
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
+
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
 # display_filters -- return an array of filters that are applied that is appropriate for display
@@ -68,7 +69,8 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
-    if request.method == 'POST':  # a query has been submitted
+    if request.method == 'POST':  # normal query, with or without query string
+        print("CASE A")
         user_query = request.form['query']
         if not user_query:
             user_query = "*"
@@ -79,7 +81,8 @@ def query():
         if not sortDir:
             sortDir = "desc"
         query_obj = create_query(user_query, [], sort, sortDir)
-    elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
+    elif request.method == 'GET':  # filter click
+        print("CASE B")
         user_query = request.args.get("query", "*")
         filters_input = request.args.getlist("filter.name")
         sort = request.args.get("sort", sort)
@@ -89,15 +92,20 @@ def query():
 
         query_obj = create_query(user_query, filters, sort, sortDir)
     else:
+        print("CASE C")
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
 
     #### Step 4.b.ii
-    response = None   # TODO: Replace me with an appropriate call to OpenSearch
+    response = opensearch.search(
+        body=query_obj,
+        index='bbuy_products'
+    )
+    
+    
     # Postprocess results here if you so desire
 
-    #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
@@ -108,20 +116,84 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
+    #### Step 4.b.i: create the appropriate query and aggregations here
     query_obj = {
-        'size': 10,
-        'query': {
+        'size': 5,
         "query": {
-                    "multi_match": {
-                        "query": q,
-                        "fields": ["name", "longDescription"],
-                        "slop": "3"
+            "bool": {
+                "must": {
+                    "query_string": {
+                        "query": user_query,
+                        "phrase_slop": 3,
+                        "fields": ["name", "longDescription", "shortDescription"]
+                    }
+                },
+                "filter": {
+                    "term": {
+                        "department": "VIDEO/COMPACT DISC"
                     }
                 }
-        }
+            }
+        },
+        "highlight": {
+            "fields": {
+                "longDescription": {},
+                "shortDescription": {}
+            }
+        },
         "aggs": {
-            #### Step 4.b.i: create the appropriate query and aggregations here
-
+            "department": {
+                "terms": {
+                    "field": "department",
+                    "size": 10
+                }
+            },
+            "regularPrice": {
+                "range": {
+                    "field": "regularPrice",
+                    "ranges": [
+                        {
+                            "from": 0,
+                            "to": 10
+                        },
+                        {
+                            "from": 10.01,
+                            "to": 20
+                        },
+                        {
+                            "from": 20.01,
+                            "to": 30
+                        },
+                        {
+                            "from": 30.01,
+                            "to": 40
+                        },
+                        {
+                            "from": 40.01,
+                            "to": 50
+                        },
+                        {
+                            "from": 50.01,
+                            "to": 60
+                        },
+                        {
+                            "from": 60.01,
+                            "to": 70
+                        },
+                        {
+                            "from": 70.01,
+                            "to": 80
+                        },
+                        {
+                            "from": 80.01,
+                            "to": 10000
+                        },
+                    ]
+                }
+            }
         }
     }
+    
+    print("HERE::: " + str(query_obj['query']['bool']['filter']))
+    
     return query_obj

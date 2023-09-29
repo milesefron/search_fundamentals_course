@@ -160,8 +160,7 @@
         "type": "integer"
       },
       "department": {
-        "type": "keyword",
-        "ignore_above": 256
+        "type": "keyword"
       },
       "departmentId": {
         "type": "integer"

@@ -114,13 +114,6 @@ def index_file(file, index_name):
             key = mappings[idx + 1]
             doc[key] = child.xpath(xpath_expr)
 
-        #print(doc['productId'])
-        #client.index(
-        #    index = index_name,
-        #    id = doc['productId'][0],
-        #    body = doc
-        #)
-
         if 'productId' not in doc or len(doc['productId']) == 0:
             docs_failed += 1
             continue

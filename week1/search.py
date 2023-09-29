@@ -10,6 +10,7 @@ from week1.opensearch import get_opensearch
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
+
 # Process the filters requested by the user and return a tuple that is appropriate for use in: the query, URLs displaying the filter and the display of the applied filters
 # filters -- convert the URL GET structure into an OpenSearch filter query
 # display_filters -- return an array of filters that are applied that is appropriate for display
@@ -44,11 +45,14 @@ def process_filters(filters_input):
             applied_filters += "&{}.from={}&{}.to={}".format(filter, from_val, filter, to_val)
         elif type == "terms":
             field = request.args.get(filter + ".fieldName", filter)
+            # weird hack. not sure why we're getting zero results without it.
+            field = field.replace('.keyword', '')
             key = request.args.get(filter + ".key", None)
             the_filter = {"term": {field: key}}
             filters.append(the_filter)
             display_filters.append("{}: {}".format(display_name, key))
             applied_filters += "&{}.fieldName={}&{}.key={}".format(filter, field, filter, key)
+            
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -68,7 +72,7 @@ def query():
     filters = None
     sort = "_score"
     sortDir = "desc"
-    if request.method == 'POST':  # a query has been submitted
+    if request.method == 'POST':  # normal query, with or without query string
         user_query = request.form['query']
         if not user_query:
             user_query = "*"
@@ -79,9 +83,8 @@ def query():
         if not sortDir:
             sortDir = "desc"
         query_obj = create_query(user_query, [], sort, sortDir)
-    elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
+    elif request.method == 'GET':  # filter click
         user_query = request.args.get("query", "*")
-        print("QUERY: " + user_query)
         filters_input = request.args.getlist("filter.name")
         sort = request.args.get("sort", sort)
         sortDir = request.args.get("sortDir", sortDir)
@@ -100,7 +103,6 @@ def query():
         index='bbuy_products'
     )
     
-    print("YEAH")
     
     # Postprocess results here if you so desire
 
@@ -118,10 +120,20 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
     query_obj = {
         'size': 5,
         "query": {
-            "query_string": {
-                "query": user_query,
-                "phrase_slop": 3,
-                "fields": ["name", "longDescription"]
+            "bool": {
+                "must": {
+                    "query_string": {
+                        "query": user_query,
+                        "phrase_slop": 3,
+                        "fields": ["name", "longDescription", "shortDescription"]
+                    }
+                }
+            }
+        },
+        "highlight": {
+            "fields": {
+                "longDescription": {},
+                "shortDescription": {}
             }
         },
         "aggs": {
@@ -132,11 +144,53 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                 }
             },
             "regularPrice": {
-                "terms": {
+                "range": {
                     "field": "regularPrice",
-                    "size": 10
+                    "ranges": [
+                        {
+                            "from": 0,
+                            "to": 10
+                        },
+                        {
+                            "from": 10.01,
+                            "to": 20
+                        },
+                        {
+                            "from": 20.01,
+                            "to": 30
+                        },
+                        {
+                            "from": 30.01,
+                            "to": 40
+                        },
+                        {
+                            "from": 40.01,
+                            "to": 50
+                        },
+                        {
+                            "from": 50.01,
+                            "to": 60
+                        },
+                        {
+                            "from": 60.01,
+                            "to": 70
+                        },
+                        {
+                            "from": 70.01,
+                            "to": 80
+                        },
+                        {
+                            "from": 80.01,
+                            "to": 10000
+                        },
+                    ]
                 }
             }
         }
     }
+    
+    if filters:
+        query_obj['query']['bool']['filter'] = filters
+
+    
     return query_obj
