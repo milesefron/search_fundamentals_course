@@ -81,7 +81,6 @@ def query():
         query_obj = create_query(user_query, [], sort, sortDir)
     elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
         user_query = request.args.get("query", "*")
-        print("QUERY: " + user_query)
         filters_input = request.args.getlist("filter.name")
         sort = request.args.get("sort", sort)
         sortDir = request.args.get("sortDir", sortDir)
@@ -95,15 +94,10 @@ def query():
     print("query obj: {}".format(query_obj))
 
     #### Step 4.b.ii
-    response = opensearch.search(
-        body=query_obj,
-        index='bbuy_products'
-    )
-    
-    print("YEAH")
-    
+    response = None   # TODO: Replace me with an appropriate call to OpenSearch
     # Postprocess results here if you so desire
 
+    #print(response)
     if error is None:
         return render_template("search_results.jinja2", query=user_query, search_response=response,
                                display_filters=display_filters, applied_filters=applied_filters,
@@ -114,29 +108,20 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    #### Step 4.b.i: create the appropriate query and aggregations here
     query_obj = {
-        'size': 5,
+        'size': 10,
+        'query': {
         "query": {
-            "query_string": {
-                "query": user_query,
-                "phrase_slop": 3,
-                "fields": ["name", "longDescription"]
-            }
-        },
+                    "multi_match": {
+                        "query": q,
+                        "fields": ["name", "longDescription"],
+                        "slop": "3"
+                    }
+                }
+        }
         "aggs": {
-            "department": {
-                "terms": {
-                    "field": "department",
-                    "size": 10
-                }
-            },
-            "regularPrice": {
-                "terms": {
-                    "field": "regularPrice",
-                    "size": 10
-                }
-            }
+            #### Step 4.b.i: create the appropriate query and aggregations here
+
         }
     }
     return query_obj

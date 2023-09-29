@@ -37,12 +37,16 @@ def main(source_file: str, index_name: str):
     client = get_opensearch()
     ds = pd.read_csv(source_file)
     #print(ds.columns)
-    ds['click_time'] = pd.to_datetime(ds['click_time'])
-    ds['query_time'] = pd.to_datetime(ds['query_time'])
+    #ds['click_time'] = pd.to_datetime(ds['click_time'])
+    #ds['query_time'] = pd.to_datetime(ds['query_time'])
     #print(ds.dtypes)
     docs = []
+    seen = {}
     tic = time.perf_counter()
     for idx, row in ds.iterrows():
+        # handle singleton row with a bad category.
+        if pd.isna(row['category']):
+            row['category'] = 'pcmcat237000050016' 
         doc = {}
         for col in ds.columns:
             doc[col] = row[col]
