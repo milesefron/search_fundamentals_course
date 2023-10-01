@@ -45,11 +45,14 @@ def process_filters(filters_input):
             applied_filters += "&{}.from={}&{}.to={}".format(filter, from_val, filter, to_val)
         elif type == "terms":
             field = request.args.get(filter + ".fieldName", filter)
+            # weird hack. not sure why we're getting zero results without it.
+            field = field.replace('.keyword', '')
             key = request.args.get(filter + ".key", None)
             the_filter = {"term": {field: key}}
             filters.append(the_filter)
             display_filters.append("{}: {}".format(display_name, key))
             applied_filters += "&{}.fieldName={}&{}.key={}".format(filter, field, filter, key)
+            
     print("Filters: {}".format(filters))
 
     return filters, display_filters, applied_filters
@@ -70,19 +73,16 @@ def query():
     sort = "_score"
     sortDir = "desc"
     if request.method == 'POST':  # normal query, with or without query string
-        print("CASE A")
         user_query = request.form['query']
         if not user_query:
             user_query = "*"
         sort = request.form["sort"]
         if not sort:
-            sort = "_score"
-        sortDir = request.form["sortDir"]
+            sort = "_score"       
         if not sortDir:
             sortDir = "desc"
         query_obj = create_query(user_query, [], sort, sortDir)
     elif request.method == 'GET':  # filter click
-        print("CASE B")
         user_query = request.args.get("query", "*")
         filters_input = request.args.getlist("filter.name")
         sort = request.args.get("sort", sort)
@@ -92,7 +92,6 @@ def query():
 
         query_obj = create_query(user_query, filters, sort, sortDir)
     else:
-        print("CASE C")
         query_obj = create_query("*", [], sort, sortDir)
 
     print("query obj: {}".format(query_obj))
@@ -114,10 +113,13 @@ def query():
         redirect(url_for("index"))
 
 
-def create_query(user_query, filters, sort="_score", sortDir="desc"):
+def create_query(user_query, filters, sort="_score", sortDir="asc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
     #### Step 4.b.i: create the appropriate query and aggregations here
     query_obj = {
+        'sort': [
+             { sort : {"order": sortDir}} 
+        ],
         'size': 5,
         "query": {
             "bool": {
@@ -125,12 +127,7 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     "query_string": {
                         "query": user_query,
                         "phrase_slop": 3,
-                        "fields": ["name", "longDescription", "shortDescription"]
-                    }
-                },
-                "filter": {
-                    "term": {
-                        "department": "VIDEO/COMPACT DISC"
+                        "fields": ["categoryPath^100", "features^50", "name^100", "longDescription^10", "shortDescription^50", "department"]
                     }
                 }
             }
@@ -153,47 +150,61 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     "field": "regularPrice",
                     "ranges": [
                         {
+                            "key": "$",
                             "from": 0,
                             "to": 10
                         },
                         {
+                            "key": "$$",
                             "from": 10.01,
                             "to": 20
                         },
                         {
+                            "key": "$$$",
                             "from": 20.01,
                             "to": 30
                         },
                         {
+                            "key": "$$$$",
                             "from": 30.01,
                             "to": 40
                         },
                         {
+                            "key": "$$$$$",
                             "from": 40.01,
                             "to": 50
                         },
-                        {
+                        {  
+                            "key": "$$$$$$",
                             "from": 50.01,
                             "to": 60
                         },
                         {
+                            "key": "$$$$$$$",
                             "from": 60.01,
                             "to": 70
                         },
                         {
+                            "key": "$$$$$$$$",
                             "from": 70.01,
                             "to": 80
                         },
                         {
+                            "key": "$$$$$$$$$",
                             "from": 80.01,
                             "to": 10000
                         },
                     ]
                 }
-            }
+                
+            },
+            "missing_images": {
+                    "missing": {"field": "image"}
+                }
         }
     }
     
-    print("HERE::: " + str(query_obj['query']['bool']['filter']))
-    
+    if filters:
+        query_obj['query']['bool']['filter'] = filters
+
     return query_obj
