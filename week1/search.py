@@ -63,7 +63,6 @@ def process_filters(filters_input):
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
     opensearch = get_opensearch() # Load up our OpenSearch client from the opensearch.py file.
-    # Put in your code to query opensearch.  Set error as appropriate.
     error = None
     user_query = None
     query_obj = None
@@ -204,6 +203,7 @@ def create_query(user_query, filters, sort="_score", sortDir="asc"):
         }
     }
     
+    # add any filters
     if filters:
         query_obj['query']['bool']['filter'] = filters
 
