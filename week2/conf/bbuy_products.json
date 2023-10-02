@@ -256,6 +256,19 @@
             "type": "text",
             "analyzer": "smarter_hyphens"
           }
+        },
+        "suggest": {
+          "type": "completion",
+          "fields": {
+            "trigrams": { 
+              "type": "text",
+              "analyzer": "trigram"
+            },
+            "text": {
+              "type": "text",
+              "analyzer": "english"
+            }
+          }
         }
       },
       "TODO: REPLACE WITH SUGGEST": {
