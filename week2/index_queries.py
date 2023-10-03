@@ -77,7 +77,12 @@ def main(source_file: str, index_name: str):
         }
         docs.append({'_index': index_name , '_source': doc})
         if len(docs) % 10 == 0:
-            bulk(client, docs, request_timeout=60)
+            try:
+                bulk(client, docs, request_timeout=60)
+            except:
+                for doc in docs:
+                    print(str(doc))
+                quit()
             docs = []
     if len(docs) > 0:
         bulk(client, docs, request_timeout=60)

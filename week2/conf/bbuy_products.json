@@ -271,9 +271,6 @@
           }
         }
       },
-      "TODO: REPLACE WITH SUGGEST": {
-        "REPLACE": "REPLACE"
-      },
       "canonical": {
         "type": "text"
       },
