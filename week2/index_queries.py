@@ -62,6 +62,7 @@ def main(source_file: str, index_name: str):
     #print(ds.dtypes)
     docs = []
     tic = time.perf_counter()
+    i=0
     for suggest, group in suggest_gb:
         unique = group["query"].unique().tolist()
         canonical = unique[0].strip().title().encode("ascii", "ignore").decode()
@@ -76,7 +77,9 @@ def main(source_file: str, index_name: str):
             "category": group["category"].unique().tolist()
         }
         docs.append({'_index': index_name , '_source': doc})
+        i = i+1
         if len(docs) % 10 == 0:
+            print(i)
             try:
                 bulk(client, docs, request_timeout=60)
             except:

@@ -4,7 +4,7 @@ PYTHON_LOC="/workspace/search_fundamentals_course/week2"
 
 LOGS_DIR="/workspace/logs"
 
-mkdir $LOGS_DIR
+
 
 echo " Query file: $QUERIES_JSON_FILE"
 curl -k -X PUT -u admin  "https://localhost:9200/bbuy_queries" -H 'Content-Type: application/json' -d "@$QUERIES_JSON_FILE"
