@@ -71,7 +71,8 @@ def autocomplete():
                         "autocomplete":{
                             "prefix": prefix,
                             "completion":{
-                                "field":"suggest"
+                                "field":"suggest",
+                                "skip_duplicates": True
                             }
                         }
                     }
@@ -79,11 +80,15 @@ def autocomplete():
                 opensearch = get_opensearch()
                 search_response = opensearch.search(body=prefix_query, index="bbuy_queries", explain=False)
                 print(search_response)
-            print("TODO: implement autocomplete AND instant search")
+            if type == 'products':
+                print("PRODUCT QUERY: " + str(prefix))
+                opensearch = get_opensearch()
+                search_response = opensearch.search(body=prefix_query, index="bbuy_products", explain=False)
             if (search_response and search_response['suggest']['autocomplete'] and search_response['suggest']['autocomplete'][0]['length'] > 0): # just a query response
                 results = search_response['suggest']['autocomplete'][0]['options']
                 print(f"Results: {results}")
                 return {"completions": results}
+            
 
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
