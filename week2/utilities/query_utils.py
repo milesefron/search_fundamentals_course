@@ -150,6 +150,9 @@ def create_query(user_query, filters, sort="_score", sortDir="desc", size=10, in
 
     if include_aggs:
         add_aggs(query_obj)
+
+    
+
     return query_obj
 
 
@@ -192,12 +195,23 @@ def add_click_priors(query_obj, user_query, priors_gb):
     try:
         prior_clicks_for_query = priors_gb.get_group(user_query)
         if prior_clicks_for_query is not None and len(prior_clicks_for_query) > 0:
+            # get a table of sku/count pairs (possibly just the top k)
+            tabular = prior_clicks_for_query['sku'].value_counts()# .head(20)
+            denominator = tabular.sum()
+
+            # build a text representation of our click prior information
             click_prior = ""
+            for idx,count in tabular.items():
+                click_prior = click_prior + ' ' + str(idx) + '^' + str(count / denominator) + " "
+
             #### W2, L1, S1
             # Create a string object of SKUs and weights that will boost documents matching the SKU
-            print("TODO: Implement me")
             if click_prior != "":
-                click_prior_query_obj = None # Implement a query object that matches on the ID or SKU with weights of
+                click_prior_query_obj = {}
+                click_prior_query_obj["query_string"] = {
+                        "query": click_prior,
+                        "fields": ["sku"]
+                    }
                 # This may feel like cheating, but it's really not, esp. in ecommerce where you have all this prior data,
                 if click_prior_query_obj is not None:
                     query_obj["query"]["function_score"]["query"]["bool"]["should"].append(click_prior_query_obj)
