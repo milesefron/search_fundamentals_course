@@ -65,11 +65,25 @@ def autocomplete():
             type = request.args.get("type", "queries") # If type == queries, this is an autocomplete request, else if products, it's an instant search request.
             ##### W2, L3, S1
             search_response = None
+            if type == 'queries':
+                prefix_query = {
+                    "suggest": {
+                        "autocomplete":{
+                            "prefix": prefix,
+                            "completion":{
+                                "field":"suggest"
+                            }
+                        }
+                    }
+                }
+                opensearch = get_opensearch()
+                search_response = opensearch.search(body=prefix_query, index="bbuy_queries", explain=False)
+                print(search_response)
             print("TODO: implement autocomplete AND instant search")
             if (search_response and search_response['suggest']['autocomplete'] and search_response['suggest']['autocomplete'][0]['length'] > 0): # just a query response
                 results = search_response['suggest']['autocomplete'][0]['options']
-    print(f"Results: {results}")
-    return {"completions": results}
+                print(f"Results: {results}")
+                return {"completions": results}
 
 @bp.route('/query', methods=['GET', 'POST'])
 def query():
