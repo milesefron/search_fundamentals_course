@@ -107,6 +107,9 @@ def query():
         query_obj = qu.create_query(user_query,  [], sort, sortDir, size=20)  # We moved create_query to a utility class so we could use it elsewhere.
         ##### W2, L1, S2
 
+        # insert
+        qu.add_spelling_suggestions(query_obj, user_query)
+        
         ##### W2, L2, S2
         print("Plain ol q: %s" % query_obj)
     elif request.method == 'GET':  # Handle the case where there is no query or just loading the page
@@ -123,6 +126,8 @@ def query():
         #### W2, L1, S2
 
         ##### W2, L2, S2
+        # insert
+        #add_spelling_suggestions(query_obj, user_query)
 
     else:
         query_obj = qu.create_query("*", "", [], sort, sortDir, size=100)

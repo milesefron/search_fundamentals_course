@@ -121,6 +121,7 @@ POST /suggesters_index/_analyze
 
 
 
+
 # Phrase Suggestion 1
 GET /suggesters_index/_search
 {
